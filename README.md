@@ -1,86 +1,138 @@
 # Video Player Toolkit · 通用视频工具
 
-一个 **Tampermonkey（油猴）用户脚本**：在 HTTP/HTTPS 网页上自动发现标准 HTML5 视频，提供浮窗、A–B 循环、区间标记、上次区间记忆和多个命名片段。**不使用网站域名白名单。**
+**A player-attached, draggable video companion.** Automatic A–B clips, remembered loops, a saved-clip timeline and picture-in-picture, without a domain allowlist.
 
-这不是独立播放器，也不会下载或剪辑视频。目的是让网页视频有更统一的控制方式，并方便反复观看指定片段。
+**吸附在播放器边缘、可拖动的视频工具。** 自动保存 A–B 片段、记忆循环区间、片段时间轴与画中画，不限制网站域名。
 
-## 安装
+[Install / Update · 安装 / 更新](https://github.com/canceled9369/video-player-toolkit/raw/refs/heads/main/video-player-toolkit.user.js) · **v3.0.0**
 
-1. 从 [Tampermonkey 官网](https://www.tampermonkey.net/) 的浏览器商店入口安装扩展。
-2. 在浏览器扩展管理 → Tampermonkey 详情中开启“允许用户脚本”（若提供），并允许在你要使用的网站上运行。
-3. 打开 [安装 / 更新脚本](https://github.com/canceled9369/video-player-toolkit/raw/refs/heads/main/video-player-toolkit.user.js)，在油猴页面选择安装。
-4. 如果页面仅显示代码，复制全部内容，在油猴 → 添加新脚本中替换默认内容并保存。
-5. **关闭旧版“完整播放器浮窗 + A–B 循环”及重复的防暂停脚本**，刷新视频页面。
+## English
 
-浏览器建议：新版桌面 Chrome / Edge。HTTP 页面、嵌入框架或不支持 Document Picture-in-Picture 的环境会尝试基础画中画，不保证提供完整浮窗。
+### What is this?
 
-## 功能与使用
+A **Tampermonkey userscript**, not a standalone video app. It detects standard HTML5 videos on HTTP/HTTPS pages and adds controls for repeating and bookmarking sections. It does not download or edit video files.
 
-- 自动检测网页中的 `<video>`；支持动态出现的视频和开放的 Shadow DOM。
-- 没有视频时不显示工具栏、不写入片段记录。检测约每两秒进行一次。
-- 右下角出现工具栏；多个视频可通过“选择视频播放器”下拉框切换。初次优先选择正在播放或画面较大的视频。
-- 点击“收起工具”可折叠面板，再点击“视频工具”展开。
-- 自带播放/暂停与进度条，在进度条上显示 A/B 标记和半透明循环区间。
-- 支持完整浮窗。Plyr、Video.js、JW Player 容器会尝试整体移动；其他播放器移动视频元素并使用原生视频控件。关闭浮窗后恢复。
-- 防暂停功能在选中的视频正在播放时拦截窗口失焦/可见性事件，可通过“切换防暂停”关闭。它不能阻止所有网站的暂停逻辑或电脑休眠。
+### Install
 
-### A–B 循环
+1. Install [Tampermonkey](https://www.tampermonkey.net/) using its official browser-store link.
+2. Enable **Allow user scripts**, if available, and grant access to the sites where you want the tool to run.
+3. Open the **Install / Update** link above and confirm installation in Tampermonkey. If it displays source code instead, copy all of it into Tampermonkey → Create a new script, replacing the template, then save.
+4. Disable older copies of this tool and duplicate anti-pause scripts. Refresh the video page.
+5. The tool starts **collapsed** on the selected video's edge. Click **Loop** to expand it.
+
+Use a recent desktop Chrome or Edge for full Document Picture-in-Picture support. Other environments may fall back to basic PiP.
+
+### Loop and clip workflow
+
+- Press `[` at the start, then `]` at the end. A valid range is **automatically saved**, named by its start/end times, selected, and looped. Setting the same range again reuses its existing clip and keeps its custom name.
+- Refreshing restores the last range and selection. If looping was enabled, the tool seeks back to A **when playback starts**. It does not independently force autoplay.
+- **Play selected clip** works before metadata has loaded: it requests playback and retries the pending seek on media readiness events. If a site blocks playback, start its original player.
+- Select a saved clip in the list, then use **Play selected clip**.
+- Hover over the tool's timeline and click **Play here** to play a saved interval containing that position. Scrubbing the tool's timeline pauses the current loop so you can explore other intervals. When intervals overlap, the shortest containing interval wins.
+- The small blue bands below the timeline represent saved clips; click a band to play that clip directly.
+- To rename: select a clip, type a new name, and press **Rename**. Delete requires a second confirmation click. Clearing the active range does not delete saved clips.
+
+| Shortcut | Action |
+| --- | --- |
+| `[` | Set A |
+| `]` | Set B, auto-save and enable loop |
+| `L` | Toggle current loop |
+| `P` | Open / close PiP |
+| `\` | Clear active range and its resume memory |
+
+Shortcuts require focus in the page or PiP window. They are ignored while typing in an input/select or editable field, including the tool's own Shadow DOM fields.
+
+### Dock and appearance
+
+- Collapsed on every page load; never pinned to the webpage's bottom-right corner.
+- Drag the dotted handle to snap to any of the video's four edges. It remains attached while scrolling/resizing. With the handle focused, arrow keys move it to an edge.
+- Dock position and language preference are saved locally. Use **EN / 中** to switch the UI language.
+- Apple-inspired compact glass surface, system typography, restrained blue accents, and short expand/press/snap transitions. This is a web UI, not an Apple native component.
+- Supports `prefers-reduced-motion`, visible keyboard focus, and a higher-contrast appearance. No dependency on animation libraries.
+- For multiple videos, choose the player from the selector. The initial choice prioritizes a playing or larger video.
+
+### Compatibility and privacy
+
+No domain restriction does **not** mean every custom player is compatible. Standard `<video>` elements and open Shadow DOM are supported; canvas-based decoders and closed Shadow DOM are not. Embedded frames need userscript permission for their own origins and may only support basic PiP.
+
+Recognized Plyr, Video.js and JW Player containers are moved as a whole for PiP; other videos use native controls. Existing thumbnail components may survive, depending on the site. The tool does **not** generate thumbnail images for its own timeline. Browser policy, protected media, native fullscreen and site DOM replacement can limit controls or PiP.
+
+Data stays in the current site's browser `localStorage`; nothing is uploaded to GitHub. Same-origin website code can read this storage. Clearing site data removes records; browser profiles and domains do not sync. Keys use the page URL and player ID/slot, while ignoring `t`, `start` and `time_continue`. Other URL changes can create separate records. Playlists that swap media without changing URL/player identity cannot always be distinguished.
+
+v2 records are retained. A remembered range that was never explicitly saved becomes a time-named clip. The earlier site-specific records are read as a fallback on matching single-video pages. Storage errors are surfaced instead of silently reporting success.
+
+### Validation
+
+Run the local behavior checks with Node.js: `node test.cjs`. No packages are required.
+
+Syntax validation and **21 local behavior checks** passed: auto-save/deduplication, refresh and original-Play recovery, selection restoration, delayed metadata/seekability, looping, manual pause, interval lookup, deletion, URL identity, docking geometry, legacy recovery and storage failures.
+
+Real Tampermonkey installation and visual/browser compatibility have **not** been verified for v3. The connected browser blocks access to extension settings, so no claim of live UI verification is made. Loop precision remains subject to media seeking and browser scheduling.
+
+## 中文
+
+### 用途与安装
+
+这是一个 **Tampermonkey（油猴）脚本**，不是独立播放器。它在 HTTP/HTTPS 网页上检测标准 HTML5 视频，为重复观看和保存播放区间提供统一控制，不下载或剪辑视频。
+
+1. 从 [Tampermonkey 官网](https://www.tampermonkey.net/) 提供的浏览器商店入口安装扩展。
+2. 开启“允许用户脚本”（若提供），并允许在目标网站运行。
+3. 点击顶部“安装 / 更新”，在油猴页面确认。若仅显示源码，将全部代码复制到油猴“添加新脚本”，替换模板并保存。
+4. 停用旧版及重复的防暂停脚本，刷新视频页面。
+5. 工具默认以**收起的胶囊按钮**吸附在视频边缘，点击“片段”展开。
+
+新版桌面 Chrome / Edge 支持完整浮窗；其他环境可能回退为基础画中画。
+
+### 自动片段与恢复播放
+
+- 按 `[` 设置起点 A，按 `]` 设置终点 B。有效区间会**自动保存为起止时间命名的片段**，选中并开始循环。相同区间再次设置不会重复新增，也不会覆盖已改好的名字。
+- 刷新后恢复上次区间和所选片段。上次循环开启时，**点击播放后会回到 A 点继续循环**；脚本不会自行强制自动播放。
+- 视频元数据尚未加载时点击“播放所选片段”，会先触发加载并保留待跳转位置，在媒体就绪后重试。网站限制播放时，请点击原播放器的播放按钮。
+- 在列表中选择任意片段，再点击“播放所选片段”。
+- 鼠标悬停工具进度条，点击“播放此区间”，会播放包含该时间点的已保存片段。也可拖动工具进度条到某个区间内；拖动时当前循环会暂停，便于选择其他片段。重叠区间优先选择最短的一个。
+- 进度条下方的蓝色短条代表已保存片段，点击即可直接播放。
+- 选中片段、输入新名称、点击“改名”。删除需要再次确认；清除当前循环不会删除保存的片段。
 
 | 快捷键 | 操作 |
 | --- | --- |
-| `P` | 浮窗 / 返回网页 |
-| `[` | 设置 A 起点 |
-| `]` | 设置 B 终点并开启循环 |
+| `[` | 设置起点 A |
+| `]` | 设置终点 B，自动保存并开启循环 |
 | `L` | 开关当前循环 |
-| `\` | 清除当前区间和上次区间记忆 |
+| `P` | 打开 / 关闭浮窗 |
+| `\` | 清除当前区间及其恢复记忆 |
 
-快捷键需要网页或浮窗获得焦点；输入框和选择框内不会触发。每个操作也有对应按钮。循环受媒体寻址、关键帧和浏览器调度影响，不保证逐帧精度。
+快捷键需要网页或浮窗获得焦点；在输入框、选择框和可编辑区域中不会触发，包括工具自身的 Shadow DOM 输入框。
 
-### 区间记忆与片段
+### 吸附、拖动与外观
 
-1. 设置 A/B 后自动保存上次区间，刷新后恢复标记，但不自动开始循环；按 `L` 继续。
-2. 输入可选名称，点击“保存为新片段”。每次保存都会新增一个片段。
-3. 从片段下拉框选择记录，点击“播放所选片段”即可从 A 点开始循环。
-4. 重命名：选中片段，在名称框输入新名字，再点击“重命名”。
-5. 删除：选中片段，点击“删除片段”，再点“确认删除”。
-6. 清除当前区间不删除已保存的片段；删除片段也不改变当前正在使用的 A/B。
+- 每次打开页面默认收起，不再固定在网页右下角。
+- 拖动点状手柄，吸附到视频上、下、左、右边缘；滚动和调整尺寸时跟随视频。手柄获得焦点后，也可用方向键切换边缘。
+- 本地记忆吸附位置与语言；通过 **EN / 中** 切换界面语言。
+- Apple 风格的紧凑半透明面板、系统字体、少量蓝色强调，以及短时展开、按压、吸附动效。它是网页实现，不是 Apple 原生控件。
+- 支持系统“减少动态效果”、键盘焦点指示和增强对比度；没有引入第三方动效库。
+- 多个视频时，可在选择器中切换控制对象；初次优先选择正在播放或画面较大的视频。
 
-## 兼容性边界
+### 限制与本地数据
 
-“不限制域名”表示脚本可在各网站发现视频，**不代表所有网站播放器都已适配**。
+不限制域名不代表所有自定义播放器都已适配。支持标准 `<video>` 和开放 Shadow DOM；不支持直接控制 Canvas 自定义解码或封闭 Shadow DOM。iframe 需要对应来源的脚本执行权限，可能只能使用基础画中画。
 
-- 标准 `<video>` 是核心支持对象；Canvas、自定义解码、封闭 Shadow DOM 中的视频无法直接识别。
-- 嵌入 iframe 需要油猴在该框架来源中有执行权限；框架自身可出现工具栏。跨域、沙盒、浏览器策略或受保护内容可能限制控制/画中画。
-- 完整浮窗仅在浏览器 API 允许时使用；iframe 中优先回退到基础画中画，工具栏留在原框架内。
-- 通用进度条不生成缩略图；已识别容器中的原网站缩略图会尝试保留，效果取决于组件跨窗口兼容性。
-- 某些网站重新渲染 DOM 时可能重建播放器、撤销控件或停止播放；此时关闭浮窗、刷新页面后重试。
-- 直播或未知时长视频不能使用常规的百分比进度条与保存区间播放。
+完整浮窗会尝试整体移动 Plyr、Video.js、JW Player 容器；其他视频使用原生控件。原有缩略图能否保留取决于网站，工具自己的进度条不会生成缩略图。受保护媒体、原生全屏、浏览器策略或网站重建播放器可能限制功能。
 
-## 本地记录与隐私
+记录仅保存在当前网站的 `localStorage`，不上传 GitHub；同源网站代码可以读取它。清除网站数据会删除记录，不跨浏览器/域名同步。记录按完整页面 URL 和播放器 ID/序号区分，忽略 `t`、`start`、`time_continue`。其他 URL 变化可能产生新记录；不改 URL 和播放器标识的播放列表暂时不能可靠区分内容。
 
-片段数据使用当前网站的浏览器 `localStorage`。脚本不上传记录、不请求外部脚本、不进行云同步；网站自身的网络行为不受影响。
+兼容 v2 数据；以前只记忆、没保存的完整区间会转成时间命名片段。同站点单视频页面也会尝试读取早期版本记录。保存失败会明确提示，不会假报成功。
 
-- 记录以完整页面 URL（含查询参数/片段）和播放器 ID 或页面中的序号区分；不同 `?v=` 不会共用记录。
-- 因此 URL 参数改变也可能形成新记录；同一 URL、同一播放器元素内切换播放列表内容而不改变 URL 时，暂时不能可靠区分视频。此时不要复用不匹配的区间。
-- 动态重排多个无 ID 视频可能改变记录对应的序号。
-- 不同域名、子域名、浏览器或用户配置不共享记录；清理网站数据会删除记录，无痕会话的记录通常不持久。
-- 同源网站脚本也能访问 localStorage；它不是加密存储。
-- 对于旧版脚本的数据：在同一站点、相同 URL 最后路径段、仅一个视频的页面，若没有新版记录，会尝试读取旧版的本地区间和片段；后续保存写入新版记录，旧数据不主动删除。
+### 验证情况
 
-## 更新与排查
+本地使用 Node.js 运行 `node test.cjs`，无需安装依赖。
 
-重新打开安装链接更新后刷新页面。没有配置自动更新地址。
+已通过语法检查和 **21 项本地行为测试**：自动保存/去重、刷新恢复、原播放器开始播放时恢复区间、片段选择、元数据/可定位区间延迟、循环边界、手动暂停、区间查找、删除、URL 区分、吸附坐标、旧记录恢复及存储失败。
 
-- **没有工具栏**：确认油猴已启用、允许用户脚本、拥有当前网页/框架权限；先开始播放，再等待两秒。
-- **选错视频**：通过工具栏的视频下拉框手动切换。
-- **不能弹出**：先退出普通画中画，使用按钮触发；检查浏览器和安全上下文限制。
-- **循环仍被暂停**：检查防暂停是否开启；若网站交互异常可关闭该功能。
-- **保存失败**：检查站点存储权限和空间；脚本会提示错误，不会主动清空旧记录。
+v3 的油猴实机安装、真实界面与跨站兼容性**尚未验证**：当前连接的浏览器禁止访问扩展设置页，因此不宣称已完成实机 UI 验证。区间循环也不是逐帧精确剪辑。
 
-## 验证状态
+## Changelog / 更新记录
 
-已完成 JavaScript 语法和本地逻辑测试，包括多片段保存、刷新恢复、URL 区分、播放/重命名/删除和存储异常。尚未对所有网站及浏览器进行实机兼容性测试；不宣称全站兼容。
+- **3.0.0** — Auto-saved clips, deferred seek/resume fixes, timeline clip lookup, collapsed draggable dock, bilingual glass-style UI. / 自动片段、延迟定位与恢复修复、区间查找、默认收起的可拖动吸附工具、中英双语玻璃风格界面。
+- **2.0.0** — Universal HTML5 video detection and multiple-player support. / 通用视频检测与多播放器选择。
 
-## 版本
-
-**2.0.0**：新仓库起点。移除域名白名单，增加通用视频发现、多播放器选择、基础控制和 iframe 画中画回退；保留区间标记与命名片段。
+To update, reinstall from the link above and refresh your video page. Automatic-update URLs are not configured. / 更新时重新打开安装链接，更新后刷新视频页面；未配置自动更新地址。
