@@ -4,7 +4,7 @@
 
 **吸附在播放器边缘、可拖动的视频工具。** 自动保存 A–B 片段、记忆循环区间、片段时间轴与画中画，不限制网站域名。
 
-[Install / Update · 安装 / 更新](https://github.com/canceled9369/video-player-toolkit/raw/refs/heads/main/video-player-toolkit.user.js) · **v3.0.0**
+[Install / Update · 安装 / 更新](https://github.com/canceled9369/video-player-toolkit/raw/refs/heads/main/video-player-toolkit.user.js) · **v3.1.0**
 
 ## English
 
@@ -44,10 +44,12 @@ Shortcuts require focus in the page or PiP window. They are ignored while typing
 
 ### Dock and appearance
 
-- Collapsed on every page load; never pinned to the webpage's bottom-right corner.
-- Drag the dotted handle to snap to any of the video's four edges. It remains attached while scrolling/resizing. With the handle focused, arrow keys move it to an edge.
+- Collapsed on every page load and docked **outside** the video with a 10px gap; never pinned to the webpage's bottom-right corner.
+- Drag the dotted handle to choose an outside edge. If the preferred edge has insufficient space, the tool tries the opposite edge and then other edges. The expanded panel can shrink and scroll internally. Valid outside placements never overlap the video.
+- It follows scrolling/resizing. With the handle focused, arrow keys choose an edge. Position changes are immediate so the tool does not animate across the picture.
+- If **no outside edge has enough space**, including many fullscreen/PiP layouts, the tool falls back to a small in-picture button that fades out after about 1.8 seconds of inactivity. Move over the video to reveal it. While hovered, keyboard-focused or explicitly expanded, it remains available. Expanding in this fallback mode temporarily overlays the video; collapse it to restore auto-hide. Native browser fullscreen may prevent injected controls entirely.
 - Dock position and language preference are saved locally. Use **EN / 中** to switch the UI language.
-- Apple-inspired compact glass surface, system typography, restrained blue accents, and short expand/press/snap transitions. This is a web UI, not an Apple native component.
+- Apple-inspired compact glass surface, system typography, restrained blue accents, and short fade/press transitions. This is a web UI, not an Apple native component.
 - Supports `prefers-reduced-motion`, visible keyboard focus, and a higher-contrast appearance. No dependency on animation libraries.
 - For multiple videos, choose the player from the selector. The initial choice prioritizes a playing or larger video.
 
@@ -65,9 +67,9 @@ v2 records are retained. A remembered range that was never explicitly saved beco
 
 Run the local behavior checks with Node.js: `node test.cjs`. No packages are required.
 
-Syntax validation and **21 local behavior checks** passed: auto-save/deduplication, refresh and original-Play recovery, selection restoration, delayed metadata/seekability, looping, manual pause, interval lookup, deletion, URL identity, docking geometry, legacy recovery and storage failures.
+Syntax validation and **27 local behavior checks** passed: auto-save/deduplication, refresh and original-Play recovery, selection restoration, delayed metadata/seekability, looping, manual pause, interval lookup, deletion, URL identity, outside docking/edge fallback, legacy recovery and storage failures. The docking test includes 2,000 generated layouts and verifies no video overlap or viewport overflow for every valid outside placement.
 
-Real Tampermonkey installation and visual/browser compatibility have **not** been verified for v3. The connected browser blocks access to extension settings, so no claim of live UI verification is made. Loop precision remains subject to media seeking and browser scheduling.
+Real Tampermonkey installation, idle-hide interactions and visual/browser compatibility have **not** been verified for v3.1. The connected browser blocks access to extension settings, so no claim of live UI verification is made. Loop precision remains subject to media seeking and browser scheduling.
 
 ## 中文
 
@@ -105,10 +107,12 @@ Real Tampermonkey installation and visual/browser compatibility have **not** bee
 
 ### 吸附、拖动与外观
 
-- 每次打开页面默认收起，不再固定在网页右下角。
-- 拖动点状手柄，吸附到视频上、下、左、右边缘；滚动和调整尺寸时跟随视频。手柄获得焦点后，也可用方向键切换边缘。
+- 每次打开页面默认收起，吸附在视频**外侧**，间隔 10px，不固定在网页右下角。
+- 拖动点状手柄选择外侧边缘。优先边缘放不下时，尝试对侧和其他边缘；展开面板可缩小并内部滚动。有效的外侧位置不会与视频相交。
+- 滚动和调整尺寸时跟随视频；手柄获得焦点后也可用方向键换边。位置即时切换，避免动效从画面中穿过。
+- **四周都没有足够空间**时（常见于全屏/画中画），回退为画面内的小按钮，停止操作约 1.8 秒后淡出；鼠标移入视频即可唤回。悬停工具、键盘焦点或主动展开时保持可用。此回退模式下，主动展开会暂时覆盖视频，收起后恢复自动隐藏。浏览器原生全屏可能完全不允许注入控件。
 - 本地记忆吸附位置与语言；通过 **EN / 中** 切换界面语言。
-- Apple 风格的紧凑半透明面板、系统字体、少量蓝色强调，以及短时展开、按压、吸附动效。它是网页实现，不是 Apple 原生控件。
+- Apple 风格的紧凑半透明面板、系统字体、少量蓝色强调，以及短时淡入淡出和按压动效。它是网页实现，不是 Apple 原生控件。
 - 支持系统“减少动态效果”、键盘焦点指示和增强对比度；没有引入第三方动效库。
 - 多个视频时，可在选择器中切换控制对象；初次优先选择正在播放或画面较大的视频。
 
@@ -126,12 +130,13 @@ Real Tampermonkey installation and visual/browser compatibility have **not** bee
 
 本地使用 Node.js 运行 `node test.cjs`，无需安装依赖。
 
-已通过语法检查和 **21 项本地行为测试**：自动保存/去重、刷新恢复、原播放器开始播放时恢复区间、片段选择、元数据/可定位区间延迟、循环边界、手动暂停、区间查找、删除、URL 区分、吸附坐标、旧记录恢复及存储失败。
+已通过语法检查和 **27 项本地行为测试**：自动保存/去重、刷新恢复、原播放器开始播放时恢复区间、片段选择、元数据/可定位区间延迟、循环边界、手动暂停、区间查找、删除、URL 区分、外侧吸附/换边、旧记录恢复及存储失败。包含 2,000 组布局检查，所有有效外侧位置均不与视频重叠、不超出视口。
 
-v3 的油猴实机安装、真实界面与跨站兼容性**尚未验证**：当前连接的浏览器禁止访问扩展设置页，因此不宣称已完成实机 UI 验证。区间循环也不是逐帧精确剪辑。
+v3.1 的油猴实机安装、自动隐藏交互、真实界面与跨站兼容性**尚未验证**：当前连接的浏览器禁止访问扩展设置页，因此不宣称已完成实机 UI 验证。区间循环也不是逐帧精确剪辑。
 
 ## Changelog / 更新记录
 
+- **3.1.0** — Outside-only placement when space permits, automatic edge fallback, constrained panel size and idle-hide overlay fallback. / 外侧吸附、空间不足自动换边、面板限高滚动及无外侧空间时自动隐藏。
 - **3.0.0** — Auto-saved clips, deferred seek/resume fixes, timeline clip lookup, collapsed draggable dock, bilingual glass-style UI. / 自动片段、延迟定位与恢复修复、区间查找、默认收起的可拖动吸附工具、中英双语玻璃风格界面。
 - **2.0.0** — Universal HTML5 video detection and multiple-player support. / 通用视频检测与多播放器选择。
 
